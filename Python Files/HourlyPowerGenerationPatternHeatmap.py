@@ -2,19 +2,20 @@ import pandas as pd
 import numpy as np
 import lightningchart as lc
 
-# Load LightningChart license key
+# Set your LightningChart license key
 with open('D:/Computer Aplication/WorkPlacement/Projects/shared_variable.txt', 'r') as f:
     mylicensekey = f.read().strip()
 lc.set_license(mylicensekey)
 
-# Load the dataset
-file_path = 'Dataset/Sonar.csv'  # Replace this with the actual file path
+# Load your dataset
+file_path = 'Dataset/Sonar.csv'  # Replace with your actual file path
 data = pd.read_csv(file_path)
 
-# Ensure the dataset has the necessary columns and filter out rows with missing data
+# Filter to ensure the dataset has the necessary columns and remove any missing values
 data = data[['Day of Year', 'First Hour of Period', 'Power Generated']].dropna()
 
 # Pivot data to prepare for the heatmap
+# Rows = Hours (0-23), Columns = Days (1-365), Values = Power Generated
 heatmap_data = data.pivot_table(
     index='First Hour of Period', 
     columns='Day of Year', 
@@ -22,52 +23,54 @@ heatmap_data = data.pivot_table(
     aggfunc='mean'
 )
 
-# Fill missing data (optional, if necessary for display consistency)
-heatmap_data.fillna(0, inplace=True)
+# Convert the heatmap data to a NumPy array and replace any NaN values with a fill value
+heatmap_array = heatmap_data.to_numpy()
+heatmap_array[np.isnan(heatmap_array)] = 0  # Replace NaN values with zero or another appropriate value
 
-# Convert the pivot table to a list of lists for the heatmap
-heatmap_values = heatmap_data.values.tolist()
-
-# Calculate min, median, and max for dynamic palette scaling
-min_value = np.min(heatmap_values)
-median_value = np.percentile(heatmap_values, 50)  # Median
-max_value = np.max(heatmap_values)
-
-# Create the heatmap chart with LightningChart
-heatmap_chart = lc.ChartXY(
-    theme=lc.Themes.Dark,
-    title='Hourly Power Generation Pattern (Heatmap)'
+# Create a new chart
+chart = lc.ChartXY(
+    title='Hourly Power Generation Pattern (Heatmap)',
+    theme=lc.Themes.Light
 )
 
-# Add HeatmapGridSeries to display the power generation values
-heatmap_series = heatmap_chart.add_heatmap_grid_series(
-    columns=len(heatmap_data.columns),
-    rows=len(heatmap_data.index)
+# Create the heatmap grid series
+grid_size_x, grid_size_y = heatmap_array.shape
+heatmap_series = chart.add_heatmap_grid_series(
+    columns=grid_size_x,
+    rows=grid_size_y,
 )
 
-heatmap_series.hide_wireframe()
-heatmap_series.set_intensity_interpolation(False)
-heatmap_series.invalidate_intensity_values(heatmap_values)
+# Set the start, end, and step positions based on heatmap dimensions
+heatmap_series.set_start(x=1, y=0)                   # Days start from 1
+heatmap_series.set_end(x=365, y=23)                  # Up to day 365 and hour 23
+heatmap_series.set_step(x=1, y=1)                    # Each day and hour increments by 1
+heatmap_series.set_intensity_interpolation(True)     # Enable intensity interpolation
 
-# Define a dynamic color palette for the heatmap based on min, median, and max values
+# Populate heatmap data
+heatmap_series.invalidate_intensity_values(heatmap_array.tolist())
+
+# Define a custom color palette for the heatmap
+min_val = np.nanmin(heatmap_array)
+max_val = np.nanmax(heatmap_array)
+palette_steps = [
+    {"value": min_val, "color": lc.Color('blue')},
+    {"value": (min_val + max_val) / 2, "color": lc.Color('green')},
+    {"value": max_val, "color": lc.Color('red')}
+]
+
+# Apply the color palette to the heatmap
 heatmap_series.set_palette_colors(
-    steps=[
-        {'value': min_value, 'color': lc.Color(0, 0, 255)},    # Blue for low values
-        {'value': median_value, 'color': lc.Color(0, 255, 0)},  # Green for median values
-        {'value': max_value, 'color': lc.Color(255, 0, 0)}     # Red for high values
-    ],
+    steps=palette_steps,
     look_up_property='value',
-    percentage_values=False
+    interpolate=True
 )
 
-# Configure X and Y axes
-x_axis = heatmap_chart.get_default_x_axis()
-x_axis.set_title('Day of Year')
-x_axis.set_interval(1, 365)
+# Configure X and Y axis titles
+chart.get_default_x_axis().set_title('Day of Year')
+chart.get_default_y_axis().set_title('Hour of Day')
 
-y_axis = heatmap_chart.get_default_y_axis()
-y_axis.set_title('Hour of Day')
-y_axis.set_interval(0, 23)
+# Add a legend for the intensity values
+chart.add_legend(data=heatmap_series).set_title('Power Generated (W)')
 
-# Open the heatmap chart
-heatmap_chart.open()
+# Open the chart
+chart.open()
