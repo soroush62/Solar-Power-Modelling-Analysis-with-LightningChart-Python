@@ -23,5 +23,6 @@ chart.get_radial_axis().set_title("Day of the Year").set_title_font(weight="bold
 area_series = chart.add_area_series().set_name("Power Generation")
 area_series.set_data([{'angle': angle, 'amplitude': amp} for angle, amp in zip(data['angle'], data['amplitude'])])
 area_series.set_highlight(10)
+line_series = chart.add_sector()
 
 chart.open()

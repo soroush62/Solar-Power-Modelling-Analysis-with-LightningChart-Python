@@ -21,6 +21,15 @@ amplitudes = (monthly_data / max_power).tolist()
 colors = cm.viridis(np.linspace(0, 1, len(amplitudes)))
 
 chart = lc.PolarChart(theme=lc.Themes.Light, title="Seasonal Power Generation Trends")
+radial_axis = chart.get_radial_axis().set_title("Month").set_title_font(weight="bold", size=14)
+ 
+radial_axis.set_division(12)
+radial_axis.set_tick_labels([
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+])
+ 
+radial_axis.set_clockwise(True).set_north(0)
+
 legend=chart.add_legend()
 legend.set_margin(180)
 for i, (month, amplitude) in enumerate(zip(monthly_data.index, amplitudes)):
