@@ -1,51 +1,71 @@
 import lightningchart as lc
 import pandas as pd
 import numpy as np
-from matplotlib import cm
 
-file_path = 'Dataset/Sonar.csv' 
-data = pd.read_csv(file_path)
-
+# Load the license key
 with open('D:/Computer Aplication/WorkPlacement/Projects/shared_variable.txt', 'r') as f:
     mylicensekey = f.read().strip()
 lc.set_license(mylicensekey)
 
-monthly_data = data.groupby('Month')['Power Generated'].mean()
+# Load the dataset
+file_path = 'Dataset/Sonar.csv'  # Replace with your actual file path
+df = pd.read_csv(file_path)
 
-month_names = ["January", "February", "March", "April", "May", "June", 
-               "July", "August", "September", "October", "November", "December"]
+# Extract necessary columns
+angles = df['Average Wind Direction (Day)'].astype(float).values 
+power_generated = df['Power Generated'].astype(float).values 
 
-max_power = monthly_data.max()
-amplitudes = (monthly_data / max_power).tolist() 
+# Create the Polar Chart
+chart = lc.PolarChart(theme=lc.Themes.Light, title="Wind Direction vs. Power Generation")
 
-colors = cm.viridis(np.linspace(0, 1, len(amplitudes)))
+# Add Polar Point Series to the chart
+point_series = chart.add_point_series()
 
-chart = lc.PolarChart(theme=lc.Themes.Light, title="Seasonal Power Generation Trends")
-radial_axis = chart.get_radial_axis().set_title("Month").set_title_font(weight="bold", size=14)
- 
-radial_axis.set_division(12)
-radial_axis.set_tick_labels([
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-])
- 
-radial_axis.set_clockwise(True).set_north(0)
+# Define color intensity based on power generated
+min_power, max_power = power_generated.min(), power_generated.max()
 
-legend=chart.add_legend()
-legend.set_margin(180)
-for i, (month, amplitude) in enumerate(zip(monthly_data.index, amplitudes)):
-    angle_start = i * 30
-    angle_end = (i + 1) * 30
-    color = lc.Color(int(colors[i][0] * 255), int(colors[i][1] * 255), int(colors[i][2] * 255))
+# Set up data points for the series
+data_points = []
+for i in range(len(angles)):
+    angle = angles[i]
+    amplitude = power_generated[i] 
+    data_points.append({
+        'angle': float(angle), 
+        'amplitude': amplitude,
+    })
 
-    sector = chart.add_sector()
-    sector.set_name(month_names[i])
-    sector.set_amplitude_start(0) 
-    sector.set_amplitude_end(amplitude)  
-    sector.set_angle_start(angle_start)
-    sector.set_angle_end(angle_end)
-    sector.set_color(color=color)
-    sector.set_stroke(color=lc.Color('white'), thickness=1) 
-    legend.add(sector)
+# Set data for the point series
+point_series.set_data(data_points)
 
+# Set color palette based on power generated
+point_series.set_palette_colors(
+    steps=[
+        {'value': min_power, 'color': lc.Color('purple')},   # Low power (purple)
+        {'value': (min_power + max_power) * 0.25, 'color': lc.Color('blue')},  # Medium-low (blue)
+        {'value': (min_power + max_power) * 0.5, 'color': lc.Color('green')},  # Medium (green)
+        {'value': (min_power + max_power) * 0.75, 'color': lc.Color('yellow')},  # Medium-high (yellow)
+        {'value': max_power, 'color': lc.Color('red')}  # High power (red)
+    ],
+    look_up_property='y',
+    interpolate=True,    
+)
 
+# Set point shape and size
+point_series.set_point_shape('circle').set_point_size(10)
+
+# Use built-in Legend for the chart
+legend = chart.add_legend()
+legend.set_title('Power Intensity Levels (kW)')
+
+# Adding multiple dummy series to the legend to show color ranges (simulated color legend)
+for level, color_name, label in zip([min_power, max_power * 0.25, max_power * 0.5, max_power * 0.75, max_power], 
+                                    ['purple', 'blue', 'green', 'yellow', 'red'],
+                                    ['Low', 'Medium-Low', 'Medium', 'Medium-High', 'High']):
+    dummy_series = chart.add_point_series()
+    dummy_series.set_point_color(lc.Color(color_name))
+    dummy_series.set_name(f'{label}: {int(level)} kW')
+    dummy_series.set_visible(False)  # We make the series invisible but keep them in the legend
+    legend.add(dummy_series)
+
+# Open the chart
 chart.open()
