@@ -524,26 +524,21 @@ cloudy_normalized = np.append(cloudy_normalized, cloudy_power)
 
 factors.append('Power Generation')
 
-# Initialize Spider Chart (Radar Chart)
 chart2 = dashboard.SpiderChart(row_index=0, column_index=1)
 chart2.set_title("Sunny Day vs. Cloudy Day: Environmental Factors and Power Generation")
 chart2.set_web_mode("circle")
 
-# Define the axes (Environmental Factors)
 for factor in factors:
     chart2.add_axis(factor)
 
-# First series for sunny day
 series_1 = chart2.add_series()
 series_1.add_points([{'axis': factors[i], 'value': sunny_normalized[i] * 100} for i in range(len(factors))])
 series_1.set_fill_color(lc.Color('yellow')).set_name('Sunny Day')
 
-# Second series for cloudy day
 series_2 = chart2.add_series()
 series_2.add_points([{'axis': factors[i], 'value': cloudy_normalized[i] * 100} for i in range(len(factors))])
 series_2.set_fill_color(lc.Color('blue')).set_name('Cloudy Day')
 
-# Add a legend
 legend2 = chart2.add_legend()
 legend2.add(series_1)
 legend2.add(series_2)
