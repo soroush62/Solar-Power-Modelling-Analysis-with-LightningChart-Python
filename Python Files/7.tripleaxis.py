@@ -3,10 +3,7 @@ import numpy as np
 import lightningchart as lc
 from datetime import datetime
 
-with open('D:/Computer Aplication/WorkPlacement/Projects/shared_variable.txt', 'r') as f:
-    mylicensekey = f.read().strip()
-lc.set_license(mylicensekey)
-
+lc.set_license('my-license-key')
 file_path = 'Dataset/Sonar.csv'
 data = pd.read_csv(file_path)
 data['Date'] = pd.to_datetime(data[['Year', 'Month', 'Day']])

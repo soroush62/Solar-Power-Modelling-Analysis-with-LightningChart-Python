@@ -5,9 +5,7 @@ import numpy as np
 file_path = 'Dataset/Sonar.csv' 
 data = pd.read_csv(file_path)
 
-with open('D:/Computer Aplication/WorkPlacement/Projects/shared_variable.txt', 'r') as f:
-    mylicensekey = f.read().strip()
-lc.set_license(mylicensekey)
+lc.set_license('my-license-key')
 
 corr_matrix = data.corr()
 

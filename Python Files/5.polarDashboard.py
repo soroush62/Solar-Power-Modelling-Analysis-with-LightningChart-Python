@@ -3,9 +3,7 @@ import pandas as pd
 import numpy as np
 from matplotlib import cm
 
-with open('D:/Computer Aplication/WorkPlacement/Projects/shared_variable.txt', 'r') as f:
-    mylicensekey = f.read().strip()
-lc.set_license(mylicensekey)
+lc.set_license('my-license-key')
 
 file_path = 'Dataset/Sonar.csv'  
 df = pd.read_csv(file_path)

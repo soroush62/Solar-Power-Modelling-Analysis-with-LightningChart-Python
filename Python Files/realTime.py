@@ -7,9 +7,7 @@ import math
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 
-with open('D:/Computer Aplication/WorkPlacement/Projects/shared_variable.txt', 'r') as f:
-    mylicensekey = f.read().strip()
-lc.set_license(mylicensekey)
+lc.set_license('my-license-key')
 
 df = pd.read_csv('Dataset/sonar.csv')
 
