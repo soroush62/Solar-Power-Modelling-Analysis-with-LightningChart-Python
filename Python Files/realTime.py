@@ -507,10 +507,3 @@ def simulate_real_time_prediction():
 dashboard.open(live=True)
 
 simulate_real_time_prediction()
-
-
-
-
-
-
-
