@@ -55,3 +55,4 @@ legend.add(power_series).add(wind_speed_series).add(pressure_series)
 legend.set_margin(140)
 
 chart.open()
+

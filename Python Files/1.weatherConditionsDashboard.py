@@ -76,3 +76,4 @@ create_point_chart(
 )
 
 dashboard.open()
+

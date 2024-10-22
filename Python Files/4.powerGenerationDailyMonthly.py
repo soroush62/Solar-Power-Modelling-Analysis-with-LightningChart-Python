@@ -43,3 +43,4 @@ for i, month_name in enumerate(month_labels, start=1):
     custom_tick.set_text(month_name)
 
 dashboard.open()
+
