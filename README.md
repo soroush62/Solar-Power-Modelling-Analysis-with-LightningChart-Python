@@ -1,4 +1,4 @@
-# Solar Power Modelling Analysis with LightningChart Python
+# Solar and Weather Conditions Analysis with LightningChart
 
 ## Introduction
 
